@@ -37,6 +37,16 @@ const BookDetail = () => {
             return; // Stop the function execution
         }
 
+        // Check if the user is logged in by looking for the user in localStorage
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        // If no user is found, redirect to the login page
+        if (!user) {
+            alert("You need to log in to add items to the cart.");
+            navigate('/login');
+            return; // Stop further execution of this function
+        }
+
         try {
             // Get the user from localStorage
             const user = JSON.parse(localStorage.getItem('user'));
@@ -48,7 +58,11 @@ const BookDetail = () => {
             };
 
             // Send a POST request to add the book to the order (order creation)
-            let response = await api.post('/orders/new', orderRequestDto);
+            let response = await api.post('/orders/new', orderRequestDto, {
+                headers: {
+                    'Authorization': 'Basic Ym9va3N0b3JlOnRlc3QxMjM=' // Send the provided in memory user from spring boot to authenticate
+                }
+            });
    
             if (response.status === 201) {
                 // If the order creation was successful, alert the user

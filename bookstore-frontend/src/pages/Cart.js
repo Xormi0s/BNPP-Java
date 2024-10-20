@@ -24,7 +24,13 @@ const Cart = () => {
     // Fetch the cart details for the given cart ID
     const fetchCart = async (cartId) => {
         try {
-            const response = await api.get(`/carts/${cartId}`); // Make a GET request to fetch the cart
+            const response = await api.get(`/carts/${cartId}`, {
+                headers: {
+                    'Authorization': 'Basic Ym9va3N0b3JlOnRlc3QxMjM=' // Send the provided in memory user from spring boot to authenticate
+                }
+            }); 
+            
+            // Make a GET request to fetch the cart
 
             if (response.status === 200) {
                 const fetchedCart = response.data; // Store the fetched cart data
@@ -40,9 +46,11 @@ const Cart = () => {
 
     // Fetch the book details for each book in the cart orders
     const fetchBooks = async (orders) => {
-        const bookRequests = orders.map(order => fetchBook(order.bookId)); // Create an array of requests to fetch book details
-        await Promise.all(bookRequests); // Wait for all book details to be fetched
-        setLoadingBooks(false); // Set loading state to false once books are fetched
+        // Loop through each order and fetch the book details one by one
+        for (let order of orders) {
+            await fetchBook(order.bookId); // Fetch each book based on its ID
+        }
+        setLoadingBooks(false); // Set loading state to false once all books are fetched
     };
 
     // Fetch individual book details by bookId
@@ -50,10 +58,11 @@ const Cart = () => {
         try {
             const response = await api.get(`/books/${bookId}`); // Fetch the book details by its ID
             if (response.status === 200) {
-                setBooks(prevBooks => ({
-                    ...prevBooks, // Keep previous books
-                    [bookId]: response.data // Add the new book to the books state
-                }));
+                // Update the books state with the new book data
+                setBooks(prevBooks => {
+                    prevBooks[bookId] = response.data; // Directly add the book to the books object
+                    return { ...prevBooks }; // Return a new copy of the books object
+                });
             } else {
                 console.error('Failed to fetch book data'); // Handle error if book fetch fails
             }

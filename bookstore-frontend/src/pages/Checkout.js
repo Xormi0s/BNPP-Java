@@ -31,7 +31,6 @@ const Checkout = () => {
                 {/* Display the total price */}
                 <h2 className="text-xl font-bold">Total Price: ${totalPrice.toFixed(2)}</h2>
             </div>
-            {/* Add payment information or further checkout steps here */}
         </div>
     );
 };
